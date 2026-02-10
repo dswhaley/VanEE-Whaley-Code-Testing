@@ -5,89 +5,81 @@ import java.util.function.Consumer;
 /**
  * UI screen for when the computer is guessing a number
  *
- * Displays the computer's guesses and processes human's answers
- * Tracks the computer's guesses
+ * Displays the computer's guesses and human's answers
  *
- * TODO: refactor this class
+ * refactored this class
  */
 public class ComputerGuessesPanel extends JPanel {
 
-    private int numGuesses;
-    private int lastGuess;
+    private final ComputerGuessesGame game;
+    private final JLabel guessMessage;
 
-    // upperBound and lowerBound track the computer's knowledge about the correct number
-    // They are updated after each guess is made
-    private int upperBound; // correct number is <= upperBound
-    private int lowerBound; // correct number is >= lowerBound
-
-    public ComputerGuessesPanel(JPanel cardsPanel, Consumer<GameResult> gameFinishedCallback){
-        numGuesses = 0;
-        upperBound = 1000;
-        lowerBound = 1;
+    public ComputerGuessesPanel(JPanel cardsPanel, Consumer<GameResult> gameFinishedCallback) {
+        this.game = new ComputerGuessesGame();
+        this.guessMessage = new JLabel("I guess ___.");
 
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+        addHeaderLabels();
+        addControlButtons(cardsPanel, gameFinishedCallback);
+        addVisibilityListener();
+    }
 
-        JLabel guessMessage = new JLabel("I guess ___.");
-        guessMessage.setAlignmentX(Component.LEFT_ALIGNMENT);
-        this.add(guessMessage);
+    private void addHeaderLabels() {
         guessMessage.setAlignmentX(Component.CENTER_ALIGNMENT);
+        this.add(guessMessage);
 
         this.add(Box.createRigidArea(new Dimension(0, 40)));
 
         JLabel prompt = new JLabel("Your number is...");
-        this.add(prompt);
         prompt.setAlignmentX(Component.CENTER_ALIGNMENT);
-        this.add(Box.createRigidArea(new Dimension(0,10)));
+        this.add(prompt);
 
-        JButton lowerBtn = new JButton("Lower");
-        lowerBtn.addActionListener(e -> {
-            upperBound = Math.min(upperBound, lastGuess);
+        this.add(Box.createRigidArea(new Dimension(0, 10)));
+    }
 
-            lastGuess = (lowerBound + upperBound + 1) / 2;
-            numGuesses += 1;
-            guessMessage.setText("I guess " + lastGuess + ".");
+    private void addControlButtons(JPanel cardsPanel, Consumer<GameResult> gameFinishedCallback) {
+        // Lower Button
+        createButton("Lower", e -> {
+            game.updateLower();
+            updateGuessDisplay();
         });
-        this.add(lowerBtn);
-        lowerBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        this.add(Box.createRigidArea(new Dimension(0,10)));
 
-        JButton correctBtn = new JButton("Equal");
-        correctBtn.addActionListener(e -> {
-            guessMessage.setText("I guess ___.");
-
-            // Send the result of the finished game to the callback
-            GameResult result = new GameResult(false, lastGuess, numGuesses);
+        // Equal Button
+        createButton("Equal", e -> {
+            // Report result before resetting UI
+            GameResult result = new GameResult(false, game.getLastGuess(), game.getNumGuesses());
             gameFinishedCallback.accept(result);
 
+            guessMessage.setText("I guess ___.");
             CardLayout cardLayout = (CardLayout) cardsPanel.getLayout();
             cardLayout.show(cardsPanel, ScreenID.GAME_OVER.name());
         });
-        this.add(correctBtn);
-        correctBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        this.add(Box.createRigidArea(new Dimension(0,10)));
 
-        JButton higherBtn = new JButton("Higher");
-        higherBtn.addActionListener(e -> {
-            lowerBound = Math.max(lowerBound, lastGuess + 1);
-
-            lastGuess = (lowerBound + upperBound + 1) / 2;
-            numGuesses += 1;
-            guessMessage.setText("I guess " + lastGuess + ".");
+        // Higher Button
+        createButton("Higher", e -> {
+            game.updateHigher();
+            updateGuessDisplay();
         });
-        this.add(higherBtn);
-        higherBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+    }
 
+    private void createButton(String text, java.awt.event.ActionListener listener) {
+        JButton button = new JButton(text);
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.addActionListener(listener);
+        this.add(button);
+        this.add(Box.createRigidArea(new Dimension(0, 10)));
+    }
 
+    private void addVisibilityListener() {
         this.addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent e) {
-                numGuesses = 0;
-                upperBound = 1000;
-                lowerBound = 1;
-
-                lastGuess = (lowerBound + upperBound + 1) / 2;
-                guessMessage.setText("I guess " + lastGuess + ".");
+                game.resetGame();
+                updateGuessDisplay();
             }
         });
     }
 
+    private void updateGuessDisplay() {
+        guessMessage.setText("I guess " + game.getLastGuess() + ".");
+    }
 }
