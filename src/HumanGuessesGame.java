@@ -7,6 +7,8 @@ import java.util.Random;
  * NOTE: You can refactor and edit this file if needed
  */
 public class HumanGuessesGame {
+    // Feels like it should be private for scoping but that would change the behavior of the code
+    // So we don't know whether to leave it or create a getter
     public final static int UPPER_BOUND = 1000;
 
     private final int target;

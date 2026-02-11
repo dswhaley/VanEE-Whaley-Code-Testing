@@ -15,6 +15,8 @@ import java.util.*;
  * Returns the number of games *within the last 30 days* where the person took a given number of guesses
  */
 public class StatsFile extends GameStats {
+    // Feels like it should be private for scoping but that would change the behavior of the code
+    // So we don't know whether to leave it or create a getter
     public static final String FILENAME = "guess-the-number-stats.csv";
 
 
