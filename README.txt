@@ -1,1 +1,1 @@
-Caleb Van Ee and Daniel Whaley worked on this project together.
+Caleb Van Ee, Daniel Whaley, and Sydney Bredenberg worked on this project together.
