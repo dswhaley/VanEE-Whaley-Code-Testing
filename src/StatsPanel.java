@@ -27,20 +27,89 @@ public class StatsPanel extends JPanel {
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
 
-        JLabel title = new JLabel("Your Stats");
-        this.add(title);
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 
-        JLabel subtitle = new JLabel("(Past 30 Days)");
-        this.add(subtitle);
-        subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        makeTitle();
+
+        makeSubTitle();
 
 
         this.add(Box.createRigidArea(new Dimension(0,40)));
 
-
         resultsPanel = new JPanel();
+
+        makePanels();
+
+        updateResultsPanel();
+
+
+        this.add(Box.createVerticalGlue());
+
+        makeQuitButton(cardsPanel);
+
+
+
+        this.add(Box.createRigidArea(new Dimension(0,20)));
+
+
+        this.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentShown(java.awt.event.ComponentEvent e) {
+                updateResultsPanel();
+            }
+        });
+    }
+
+    private void makeTitle(){
+        JLabel title = new JLabel("Your Stats");
+        this.add(title);
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+    }
+
+    private void makeSubTitle(){
+        JLabel subtitle = new JLabel("(Past 30 Days)");
+        this.add(subtitle);
+        subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+    }
+
+
+
+    private void makeQuitButton(JPanel cardsPanel){
+        JButton quit = new JButton("Back to Home");
+        quit.addActionListener(e -> {
+            // See itemStateChanged in https://docs.oracle.com/javase/tutorial/uiswing/examples/layout/CardLayoutDemoProject/src/layout/CardLayoutDemo.java
+            CardLayout cardLayout = (CardLayout) cardsPanel.getLayout();
+            cardLayout.show(cardsPanel, ScreenID.HOME.name());
+        });
+        this.add(quit);
+        quit.setAlignmentX(Component.CENTER_ALIGNMENT);
+    }
+
+
+    private void clearResults(){
+        for(JLabel lbl : resultsLabels){
+            lbl.setText("--");
+        }
+    }
+
+
+    private void updateResultsPanel(){
+        clearResults();
+
+
+        GameStats stats = new StatsFile();
+
+
+        StatsCalculator calc = new StatsCalculator(stats);
+        ArrayList<String> data = calc.updateResults();
+
+        for(int i = 0; i < data.size(); i++) {
+            JLabel resultLabel = resultsLabels.get(i);
+            resultLabel.setText(data.get(i));
+        }
+    }
+
+    private void makePanels(){
         resultsLabels = new ArrayList<>();
         resultsPanel.setLayout(new GridLayout(0, 2));
         resultsPanel.add(new JLabel("Guesses"));
@@ -72,72 +141,6 @@ public class StatsPanel extends JPanel {
         resultsPanel.setMinimumSize(new Dimension(120, 120));
         this.add(resultsPanel);
         resultsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        updateResultsPanel();
-
-
-        this.add(Box.createVerticalGlue());
-
-
-        JButton quit = new JButton("Back to Home");
-        quit.addActionListener(e -> {
-            // See itemStateChanged in https://docs.oracle.com/javase/tutorial/uiswing/examples/layout/CardLayoutDemoProject/src/layout/CardLayoutDemo.java
-            CardLayout cardLayout = (CardLayout) cardsPanel.getLayout();
-            cardLayout.show(cardsPanel, ScreenID.HOME.name());
-        });
-        this.add(quit);
-        quit.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-
-        this.add(Box.createRigidArea(new Dimension(0,20)));
-
-
-        this.addComponentListener(new java.awt.event.ComponentAdapter() {
-            public void componentShown(java.awt.event.ComponentEvent e) {
-                updateResultsPanel();
-            }
-        });
-    }
-
-
-
-
-    private void clearResults(){
-        for(JLabel lbl : resultsLabels){
-            lbl.setText("--");
-        }
-    }
-
-
-    private void updateResultsPanel(){
-        clearResults();
-
-
-        GameStats stats = new StatsFile();
-
-
-        for(int binIndex=0; binIndex<BIN_EDGES.length; binIndex++){
-            final int lowerBound = BIN_EDGES[binIndex];
-            int numGames = 0;
-
-
-            if(binIndex == BIN_EDGES.length-1){
-                // last bin
-                // Sum all the results from lowerBound on up
-                for(int numGuesses=lowerBound; numGuesses<stats.maxNumGuesses(); numGuesses++){
-                    numGames += stats.numGames(numGuesses);
-                }
-            }
-            else{
-                int upperBound = BIN_EDGES[binIndex+1];
-                for(int numGuesses=lowerBound; numGuesses <= upperBound; numGuesses++) {
-                    numGames += stats.numGames(numGuesses);
-                }
-            }
-
-
-            JLabel resultLabel = resultsLabels.get(binIndex);
-            resultLabel.setText(Integer.toString(numGames));
-        }
     }
 }
 
