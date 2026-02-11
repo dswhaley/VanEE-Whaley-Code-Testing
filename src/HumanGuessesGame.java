@@ -21,6 +21,13 @@ public class HumanGuessesGame {
         gameIsDone = false;
     }
 
+    // Package-private constructor to allow deterministic testing
+    HumanGuessesGame(int target) {
+        this.target = target;
+        numGuesses = 0;
+        gameIsDone = false;
+    }
+
     GuessResult makeGuess(int value){
         numGuesses += 1;
 
@@ -33,6 +40,7 @@ public class HumanGuessesGame {
 
         return GuessResult.CORRECT;
     }
+
 
     int getNumGuesses(){
         return numGuesses;
