@@ -21,6 +21,13 @@ public class HumanGuessesGame {
         gameIsDone = false;
     }
 
+    HumanGuessesGame(int target){
+        this.target = target;
+        this.numGuesses = 0;
+        this.gameIsDone = false;
+        this.gameIsDone = false;
+    }
+
     GuessResult makeGuess(int value){
         numGuesses += 1;
 
