@@ -11,6 +11,19 @@ public class GuessLogger {
         record[1] = Integer.toString(result.numGuesses);
 
         writer.writeNext(record);
+
+        // Debugging...
+        System.out.println("Logged game result: " + record[0] + ", " + record[1]);
+
+        // None of our games are making it to the CSV file even though they did on the fresh copy...
+        // Not sure if it's a bug to keep (writer is never flushed, nor closed) or if someone broke something
+
+        // Looks like the lack of a flush/close was the issue. Going to check our tests
+        // but since we aren't supposed to be fixing bugs will leave it commented out
+//        try {
+//            writer.close();
+//        } catch (IOException e) {
+//        }
     }
 
     public void logStats(GameResult result) {
